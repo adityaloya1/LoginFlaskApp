@@ -1,8 +1,8 @@
 import sqlite3
 
-from flask import Flask, render_template, url_for, request, g, send_file
+from flask import Flask, request, g, render_template, send_file
 
-DATABASE = '/var/www/html/LoginPageFlask/example.db'
+DATABASE = '/var/www/html/flaskapp/example.db'
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -33,55 +33,55 @@ def commit():
 
 @app.route("/")
 def hello():
-    execute_query("DROP TABLE IF EXISTS users")
-    execute_query("CREATE TABLE users (Username text,Password text,firstname text, lastname text, email text, count integer)")
-    return render_template('index.html')
-
-@app.route('/login', methods =['POST', 'GET'])
-def login():
-    message = ''
-    if request.method == 'POST' and str(request.form['username']) !="" and str(request.form['password']) != "":
-        username = str(request.form['username'])
-        password = str(request.form['password'])
-        result = execute_query("""SELECT firstname,lastname,email,count  FROM users WHERE Username  = (?) AND Password = (?)""", (username, password ))
-        if result:
-            for row in result:
-                return responsePage(row[0], row[1], row[2], row[3])
-        else:
-            message = 'Invalid Credentials !'
-    elif request.method == 'POST':
-        message = 'Please enter Credentials'
-    return render_template('index.html', message = message)
+        execute_query("DROP TABLE IF EXISTS users")
+        execute_query("CREATE TABLE users (Username text,Password text,firstname text, lastname text, email text, count integer)")
+        return render_template('login.html')
 
 @app.route('/registration', methods =['GET', 'POST'])
 def registration():
-    message = ''
-    if request.method == 'POST' and str(request.form['username']) !="" and str(request.form['password']) !="" and str(request.form['firstname']) !="" and str(request.form['lastname']) !="" and str(request.form['email']) !="":
-        username = str(request.form['username'])
-        password = str(request.form['password'])
-        firstname = str(request.form['firstname'])
-        lastname = str(request.form['lastname'])
-        email = str(request.form['email'])
-        uploaded_file = request.files['textfile']
-        if not uploaded_file:
-            filename = null
-            word_count = null
+    msg = ''
+    if request.method == 'POST' and str(request.form['usn']) !="" and str(request.form['pwd']) !="" and str(request.form['fn']) !="" and str(request.form['ln']) !="" and str(request.form['em']) !="":
+        username = str(request.form['usn'])
+        password = str(request.form['pwd'])
+        firstname = str(request.form['fn'])
+        lastname = str(request.form['ln'])
+        email = str(request.form['em'])
+        ufile = request.files['textfile']
+        if not ufile:
+            fname = null
+            count = null
         else :
-            filename = uploaded_file.filename
-            word_count = getNumberOfWords(uploaded_file)
-        result = execute_query("""SELECT *  FROM users WHERE Username  = (?)""", (username, ))
-        if result:
-            message = 'User has already registered!'
+            fname = ufile.filename
+            count = getNumberOfWords(ufile)
+        res = execute_query("""SELECT *  FROM users WHERE Username  = (?)""", (username, ))
+        if res:
+            msg = 'User has already registered!'
         else:
-            result1 = execute_query("""INSERT INTO users (username, password, firstname, lastname, email, count) values (?, ?, ?, ?, ?, ? )""", (username, password, firstname, lastname, email, word_count, ))
+            sq1 = execute_query("""INSERT INTO users (username, password, firstname, lastname, email, count) values (?, ?, ?, ?, ?, ? )""", (username, password, firstname, lastname, email, count ))
             commit()
-            result2 = execute_query("""SELECT firstname,lastname,email,count  FROM users WHERE Username  = (?) AND Password = (?)""", (username, password ))
-            if result2:
-                for row in result2:
+            sq2 = execute_query("""SELECT firstname,lastname,email,count  FROM users WHERE Username  = (?) AND Password = (?)""", (username, password ))
+            if sq2:
+                for row in sq2:
                     return responsePage(row[0], row[1], row[2], row[3])
     elif request.method == 'POST':
-        message = 'Some of the fields are missing!'
-    return render_template('registration.html', message = message)
+        msg = 'Some of the fields are missing!'
+    return render_template('registration.html', message = msg)
+
+@app.route('/login', methods =['POST', 'GET'])
+def login():
+    msg = ''
+    if request.method == 'POST' and str(request.form['usn']) !="" and str(request.form['pwd']) != "":
+        username = str(request.form['usn'])
+        password = str(request.form['pwd'])
+        sq = execute_query("""SELECT firstname,lastname,email,count  FROM users WHERE Username  = (?) AND Password = (?)""", (username, password ))
+        if sq:
+            for row in sq:
+                return responsePage(row[0], row[1], row[2], row[3])
+        else:
+            msg = 'Invalid Credentials !'
+    elif request.method == 'POST':
+        msg = 'Please enter Credentials'
+    return render_template('login.html', message = msg)
 
 @app.route("/download")
 def download():
@@ -94,7 +94,7 @@ def getNumberOfWords(file):
     return str(len(words))
 
 def responsePage(firstname, lastname, email, count):
-    return """ First Name :  """ + str(firstname) + """ <br> Last Name : """ + str(lastname) + """ <br> Email : """ + str(email) + """ <br> Word Count : """ + str(count) + """ <br><br> <a href="/download" >Download</a> """
+    return """User details <br><br> Name :  """ + str(firstname) + """ <br> Surname : """ + str(lastname) + """ <br> Email : """ + str(email) + """ <br><br> No of Words: """ + str(count) + """ <br><br> <a href="/download" >Download</a> """
 
 if __name__ == '__main__':
   app.run()
