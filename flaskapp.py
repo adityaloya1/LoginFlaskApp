@@ -35,7 +35,7 @@ def commit():
 def hello():
         execute_query("DROP TABLE IF EXISTS users")
         execute_query("CREATE TABLE users (Username text,Password text,firstname text, lastname text, email text, count integer)")
-        return render_template('login.html')
+        return render_template('index.html')
 
 @app.route('/registration', methods =['GET', 'POST'])
 def registration():
