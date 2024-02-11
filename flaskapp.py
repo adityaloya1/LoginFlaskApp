@@ -81,7 +81,7 @@ def login():
             msg = 'Invalid Credentials !'
     elif request.method == 'POST':
         msg = 'Please enter Credentials'
-    return render_template('login.html', message = msg)
+    return render_template('index.html', message = msg)
 
 @app.route("/download")
 def download():
